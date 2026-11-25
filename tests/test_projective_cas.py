@@ -249,3 +249,34 @@ def test_infinite_dimensional_operator_resolvent_and_riesz_dunford_calculus() ->
         assert heat_val.is_real()
 
 
+def test_fundamental_mathematical_constants_pure_rational() -> None:
+    """Verify non-circular projective computation of pi, e, ln(2), phi, Gauss lemniscate varpi,
+    Gamma(1/4), Catalan's constant G, Apery's constant zeta(3), and Euler-Mascheroni gamma to 50 digits.
+    """
+    from guiders_math import (
+        projective_apery_zeta3,
+        projective_catalan_G,
+        projective_e,
+        projective_euler_gamma,
+        projective_gamma_quarter,
+        projective_golden_ratio,
+        projective_lemniscate_varpi,
+        projective_ln2,
+        projective_pi,
+    )
+
+    with localcontext() as ctx:
+        ctx.prec = 55
+        tol = Decimal("1e-48")
+        assert abs(projective_pi(50) - Decimal("3.1415926535897932384626433832795028841971693993751")) < tol
+        assert abs(projective_e(50) - Decimal("2.7182818284590452353602874713526624977572470937000")) < tol
+        assert abs(projective_ln2(50) - Decimal("0.69314718055994530941723212145817656807550013436026")) < tol
+        assert abs(projective_golden_ratio(50) - Decimal("1.6180339887498948482045868343656381177203091798058")) < tol
+        assert abs(projective_lemniscate_varpi(50) - Decimal("2.6220575542921198104648395898911194136827549514316")) < tol
+        assert abs(projective_gamma_quarter(50) - Decimal("3.6256099082219083119306851558676720029951676828801")) < tol
+        assert abs(projective_catalan_G(50) - Decimal("0.91596559417721901505460351493238411077414937428167")) < tol
+        assert abs(projective_apery_zeta3(50) - Decimal("1.2020569031595942853997381615114499907649862923405")) < tol
+        assert abs(projective_euler_gamma(50) - Decimal("0.57721566490153286060651209008240243104215933593992")) < tol
+
+
+

@@ -443,3 +443,147 @@ def eval_to_complex_decimal(
     with localcontext() as ctx:
         ctx.prec = digits
         return ComplexDecimal(+re, +im, digits=digits)
+
+
+def projective_e(digits: int = 50) -> Decimal:
+    """Compute Euler's number e = exp_P(1) to `digits` decimal places via dyadic halving + (5, 5) Cayley-Pade."""
+    return projective_exp_C(1, digits=digits).re
+
+
+def projective_ln2(digits: int = 50) -> Decimal:
+    """Compute ln(2) = Log_P(2) to `digits` decimal places via Heron square-root descent + Cayley-Pade (5, 5)."""
+    return projective_log_C(2, digits=digits).re
+
+
+def projective_golden_ratio(digits: int = 50) -> Decimal:
+    """Compute the golden ratio phi = (1 + sqrt(5)) / 2 via pure Heron-Newton rational iteration."""
+    work_prec = digits + 15
+    with localcontext() as ctx:
+        ctx.prec = work_prec
+        val = (Decimal(1) + rational_sqrt_decimal(5, work_prec)) / Decimal(2)
+    with localcontext() as ctx:
+        ctx.prec = digits
+        return +val
+
+
+def projective_lemniscate_varpi(digits: int = 50) -> Decimal:
+    """Compute Gauss's lemniscate constant varpi = 2 * int_0^1 dx / sqrt(1 - x^4) = pi / AGM(1, sqrt(2))
+    using quadratic Arithmetic-Geometric Mean descent over Q(sqrt(2)) (d = 3).
+    """
+    work_prec = digits + 20
+    with localcontext() as ctx:
+        ctx.prec = work_prec
+        pi_val = projective_pi(work_prec)
+        a = Decimal(1)
+        b = rational_sqrt_decimal(2, work_prec)
+        n_steps = int(math.ceil(math.log2(work_prec))) + 4
+        two = Decimal(2)
+        for _ in range(n_steps):
+            a_next = (a + b) / two
+            b_next = rational_sqrt_decimal(a * b, work_prec)
+            if abs(a_next - b_next) <= Decimal(10) ** (-(digits + 15)):
+                a = a_next
+                break
+            a, b = a_next, b_next
+        varpi = pi_val / a
+    with localcontext() as ctx:
+        ctx.prec = digits
+        return +varpi
+
+
+def projective_gamma_quarter(digits: int = 50) -> Decimal:
+    """Compute Gamma(1/4) = sqrt(2 * varpi * sqrt(2 * pi)) purely via Gauss AGM(1, sqrt(2)) and Heron radicals."""
+    work_prec = digits + 20
+    with localcontext() as ctx:
+        ctx.prec = work_prec
+        pi_val = projective_pi(work_prec)
+        varpi = projective_lemniscate_varpi(work_prec)
+        sqrt_2pi = rational_sqrt_decimal(Decimal(2) * pi_val, work_prec)
+        g14 = rational_sqrt_decimal(Decimal(2) * varpi * sqrt_2pi, work_prec)
+    with localcontext() as ctx:
+        ctx.prec = digits
+        return +g14
+
+
+def projective_catalan_G(digits: int = 50) -> Decimal:
+    """Compute Catalan's constant G = sum_{k=0}^oo (-1)^k / (2k+1)^2 = int_0^1 arctan(x)/x dx
+    via Ramanujan's projective identity over Q(sqrt(3)) (d = 4):
+        G = (pi / 8) * Log_P(2 + sqrt(3)) + (3 / 8) * sum_{k=0}^oo (k!)^2 / ((2k+1)! * (2k+1)).
+    """
+    work_prec = digits + 25
+    with localcontext() as ctx:
+        ctx.prec = work_prec
+        pi_val = projective_pi(work_prec)
+        sqrt3 = rational_sqrt_decimal(3, work_prec)
+        ln_unit = projective_log_C(Decimal(2) + sqrt3, work_prec).re
+        s = Decimal(0)
+        term = Decimal(1)
+        tol = Decimal(10) ** (-(digits + 20))
+        max_k = int(work_prec * 1.8) + 20
+        for k in range(max_k):
+            contrib = term / Decimal(2 * k + 1)
+            s += contrib
+            if abs(contrib) <= tol:
+                break
+            term = term * Decimal(k + 1) / Decimal(2 * (2 * k + 3))
+        g_val = (pi_val / Decimal(8)) * ln_unit + (Decimal(3) / Decimal(8)) * s
+    with localcontext() as ctx:
+        ctx.prec = digits
+        return +g_val
+
+
+def projective_apery_zeta3(digits: int = 50) -> Decimal:
+    """Compute Apery's constant zeta(3) = sum_{n=1}^oo 1/n^3 via Amdeberhan-Zeilberger pure-rational
+    hypergeometric Pade acceleration (~3.01 decimal digits per step):
+        zeta(3) = (1/64) * sum_{k=0}^oo (-1)^k * (205*k^2 + 250*k + 77) * (k!)^10 / ((2k+1)!)^5.
+    """
+    work_prec = digits + 25
+    with localcontext() as ctx:
+        ctx.prec = work_prec
+        zeta3 = Decimal(0)
+        term_num = Decimal(1)
+        tol = Decimal(10) ** (-(digits + 20))
+        max_k = (work_prec // 3) + 12
+        for k in range(max_k):
+            poly = Decimal(205 * k * k + 250 * k + 77)
+            sign = Decimal(-1) if (k & 1) else Decimal(1)
+            contrib = sign * poly * term_num
+            zeta3 += contrib
+            if abs(contrib) <= tol:
+                break
+            num_step = Decimal((k + 1) ** 5)
+            den_step = Decimal(32) * Decimal((2 * k + 3) ** 5)
+            term_num = term_num * num_step / den_step
+        zeta3 = zeta3 / Decimal(64)
+    with localcontext() as ctx:
+        ctx.prec = digits
+        return +zeta3
+
+
+def projective_euler_gamma(digits: int = 50) -> Decimal:
+    """Compute the Euler-Mascheroni constant gamma via Brent-McMillan rational Bessel acceleration
+    paired with pure-rational projective logarithm Log_P(n).
+    """
+    work_prec = digits + 25
+    with localcontext() as ctx:
+        ctx.prec = work_prec
+        n = int(digits * 1.15) + 10
+        ln_n = projective_log_C(n, work_prec).re
+        a_term = -ln_n
+        b_term = Decimal(1)
+        u_sum = a_term
+        v_sum = b_term
+        n2 = Decimal(n * n)
+        tol = Decimal(10) ** (-(digits + 20))
+        for k in range(1, 5 * n + 30):
+            k_dec = Decimal(k)
+            b_term = b_term * n2 / (k_dec * k_dec)
+            a_term = (a_term * n2 / k_dec + b_term) / k_dec
+            u_sum += a_term
+            v_sum += b_term
+            if abs(a_term) < tol and abs(b_term) < tol:
+                break
+        gamma_val = u_sum / v_sum
+    with localcontext() as ctx:
+        ctx.prec = digits
+        return +gamma_val
