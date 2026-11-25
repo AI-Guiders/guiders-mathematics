@@ -218,3 +218,34 @@ def test_quintic_aberth_and_cubic_airy_fresnel() -> None:
         ref_airy = Decimal(str(sp.N(sp.gamma(sp.Rational(1, 3)) / (2 * sp.sqrt(3)), 40)))
         assert abs(res_airy.eval_R() - ref_airy) < Decimal("1e-32")
 
+
+def test_infinite_dimensional_operator_resolvent_and_riesz_dunford_calculus() -> None:
+    """Verify Stieltjes-Pade projective resolvent G_N(z) and Riesz-Dunford functional calculus
+    <psi_0 | exp(-t * L) | psi_0> for a Hilbert-space operator from its power moments mu_k.
+    """
+    from guiders_math import p_resolvent_spectrum
+
+    with localcontext() as ctx:
+        ctx.prec = 55
+        # Operator L with spectral projection weights w_1 = 1/3 at lambda_1 = 1 and w_2 = 2/3 at lambda_2 = 4:
+        # Power moments mu_k = (1/3)*1^k + (2/3)*4^k for k = 0, 1, 2, 3:
+        moments = [
+            sp.Rational(1, 3) + sp.Rational(2, 3) * (4**k)
+            for k in range(4)
+        ]
+        res = p_resolvent_spectrum(moments, "z", digits=50)
+        z = sp.Symbol("z")
+        # Exact resolvent is (1/3)/(z - 1) + (2/3)/(z - 4) = (z - 2) / (z^2 - 5*z + 4)
+        expected_resolvent = (z - 2) / (z**2 - 5 * z + 4)
+        assert sp.simplify(res.resolvent_expr - expected_resolvent) == 0
+        assert res.total_spectral_weight_sympy() == 1
+
+        # Riesz-Dunford functional calculus: <psi_0 | exp(-L) | psi_0> = (1/3)*e^(-1) + (2/3)*e^(-4)
+        heat_val = res.eval_operator_function("exp", param=-1, digits=50)
+        e_m1 = projective_exp_C(-1, digits=52).re
+        e_m4 = projective_exp_C(-4, digits=52).re
+        expected_heat = (e_m1 + Decimal(2) * e_m4) / Decimal(3)
+        assert abs(heat_val.re - expected_heat) < Decimal("1e-47")
+        assert heat_val.is_real()
+
+

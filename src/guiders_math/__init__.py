@@ -17,6 +17,7 @@ from guiders_math.eval_rc import (
 )
 from guiders_math.field import MoebiusTransform, P1Point, QQuadExt, cross_ratio
 from guiders_math.functor import ProjectiveLift, lift_integrand_to_projective, p_prove_identity, p_simplify
+from guiders_math.operator_space import ProjectiveResolventResult, p_resolvent_spectrum
 from guiders_math.poly_engine import (
     HermiteDecomposition,
     PoleResidue,
@@ -72,4 +73,6 @@ __all__ = [
     "projective_sympy_primitive",
     "projective_sympy_definite",
     "install_sympy_kernel",
+    "ProjectiveResolventResult",
+    "p_resolvent_spectrum",
 ]
