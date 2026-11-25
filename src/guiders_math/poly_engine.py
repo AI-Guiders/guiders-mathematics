@@ -216,10 +216,12 @@ def hermite_reduction(num: sp.Expr, den: sp.Expr, var: sp.Symbol) -> HermiteDeco
     if den_p.is_zero:
         raise ZeroDivisionError("Denominator polynomial Q(t) is zero.")
 
-    # Normalize denominator to be monic
-    lc = den_p.LC()
-    num_expr = sp.simplify(num_p.as_expr() / lc)
-    den_expr = sp.simplify(den_p.as_expr() / lc)
+    # Normalize denominator using sqf_list leading rational content so prod(fac**mult) == den_expr
+    sqf_coeff, sqf_factors = sp.sqf_list(den_p.as_expr(), var)
+    num_expr = sp.simplify(num_p.as_expr() / sqf_coeff)
+    den_expr = sp.Integer(1)
+    for fac, mult in sqf_factors:
+        den_expr = sp.expand(den_expr * (fac ** mult))
 
     num_p = sp.Poly(num_expr, var)
     den_p = sp.Poly(den_expr, var)
@@ -239,12 +241,7 @@ def hermite_reduction(num: sp.Expr, den: sp.Expr, var: sp.Symbol) -> HermiteDeco
             sqfree_den=sp.Integer(1),
         )
 
-    # 2.Mack / Yun square-free reduction:
-    # Let V = Q, A = r_poly. While gcd(V, V') has degree > 0:
-    # Let V_minus = gcd(V, V'), V_star = V / V_minus.
-    # Actually standard Hermite-Mack iterative step:
-    # Write Q = U * V^m via sqf_list.
-    _, sqf_factors = sp.sqf_list(den_p.as_expr(), var)
+    # 2. Mack / Yun square-free reduction:
     # Build dictionary {multiplicity: poly}
     mult_map: dict[int, sp.Expr] = {}
     max_m = 1
