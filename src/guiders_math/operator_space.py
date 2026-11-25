@@ -67,11 +67,11 @@ class ProjectiveResolventResult:
         using pure-rational projective descent on R and C.
 
         Supported `fn_kind`:
-          - "exp":      f(L) = exp(param * L)       (heat semigroup / quantum propagator)
-          - "cos":      f(L) = cos(param * L)       (wave propagator)
-          - "sin":      f(L) = sin(param * L)
-          - "log":      f(L) = Log_P(param * L)     (operator entropy / determinant generator)
-          - "resolvent":f(L) = (param * I - L)^(-1)
+          - "exp":      f(L) = exp(param * L)       (time-evolution operator)
+          - "cos":      f(L) = cos(param * L)       (even wave-evolution operator)
+          - "sin":      f(L) = sin(param * L)       (odd wave-evolution operator)
+          - "log":      f(L) = Log_P(param * L)     (operator logarithm)
+          - "resolvent":f(L) = (param * I - L)^(-1) (operator resolvent)
         """
         work_prec = digits + 20
         p_c = eval_to_complex_decimal(param, digits=work_prec)
