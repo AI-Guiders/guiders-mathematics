@@ -31,6 +31,11 @@ from guiders_math.quadrature import (
     p_contour_integrate,
     p_integrate,
 )
+from guiders_math.sympy_bridge import (
+    install_sympy_kernel,
+    projective_sympy_definite,
+    projective_sympy_primitive,
+)
 
 __all__ = [
     "QQuadExt",
@@ -64,4 +69,7 @@ __all__ = [
     "p_diff",
     "p_pade",
     "p_dsolve",
+    "projective_sympy_primitive",
+    "projective_sympy_definite",
+    "install_sympy_kernel",
 ]

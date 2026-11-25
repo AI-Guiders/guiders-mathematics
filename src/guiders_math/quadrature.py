@@ -367,10 +367,10 @@ def _projective_gamma_rational(s: Fraction, digits: int = 50) -> Decimal:
             ln_2pi = projective_log_C(ComplexDecimal(Decimal(2) * pi_val, Decimal(0), work_prec), work_prec).re
             stirling = (z - Decimal("0.5")) * ln_z - z + Decimal("0.5") * ln_2pi
 
-            # Bernoulli numbers B_{2k} via exact rational recurrence
+            # Bernoulli numbers B_{2k} via exact rational recurrence, scaled automatically with `digits`
             bernoulli_even: list[Fraction] = []
             b_all: list[Fraction] = [Fraction(1, 1)]
-            max_2k = 32
+            max_2k = max(32, 2 * ((digits // 3) + 8))
             for m_idx in range(1, max_2k + 1):
                 if m_idx > 1 and m_idx % 2 == 1:
                     b_all.append(Fraction(0, 1))

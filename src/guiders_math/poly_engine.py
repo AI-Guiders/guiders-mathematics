@@ -345,7 +345,8 @@ def _aberth_roots_pure_rational(coeffs: list[ComplexDecimal], digits: int = 50) 
             roots.append((r_scale * c_t, r_scale * s_t))
 
         tol = Decimal(10) ** (-(digits + 16))
-        for _ in range(120):
+        max_aberth_iter = max(120, digits * 2)
+        for _ in range(max_aberth_iter):
             max_delta = Decimal(0)
             new_roots = list(roots)
             for i in range(n):
