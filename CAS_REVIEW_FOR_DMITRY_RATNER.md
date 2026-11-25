@@ -217,7 +217,30 @@ pytest test/builtin/numbers/test_projective_calculus.py -v
    StieltjesPadeResolvent[{1, 1/2, 3/4, 11/8, 19/16}, z]
    (* -> (-3 + 4 * z) / (3 - 8 * z + 4 * z ^ 2)  — точные полюса z = 1/2 и z = 3/2! *)
    ```
-10. **Wolfram Language MCP-сервер (`mathics3-mcp`) для подключения к любому ИИ-агенту (Cursor / Claude Code / OpenCode):**
+10. **Нециклические чисто рациональные фундаментальные константы (`ProjectiveConstant[name, digits]`, 0 `mpmath`):**
+    ```wolfram
+    ProjectiveConstant["Pi", 50]
+    (* -> 3.1415926535897932384626433832795028841971693993751 *)
+
+    ProjectiveConstant["E", 50]
+    (* -> 2.7182818284590452353602874713526624977572470937000 *)
+
+    ProjectiveConstant["Lemniscate", 50]
+    (* -> 2.6220575542921198104648395898911194136827549514316  (через AGM(1, Sqrt[2]) в Q(Sqrt[2])) *)
+
+    ProjectiveConstant["Gamma14", 50]
+    (* -> 3.6256099082219083119306851558676720029951676828801  (Gamma(1/4)) *)
+
+    ProjectiveConstant["Catalan", 50]
+    (* -> 0.91596559417721901505460351493238411077414937428167  (через Log_P(2 + Sqrt[3]) в Q(Sqrt[3])) *)
+
+    ProjectiveConstant["Apery", 50]
+    (* -> 1.2020569031595942853997381615114499907649862923405  (Zeta(3)) *)
+
+    ProjectiveConstant["EulerGamma", 50]
+    (* -> 0.57721566490153286060651209008240243104215933593992 *)
+    ```
+11. **Wolfram Language MCP-сервер (`mathics3-mcp`) для подключения к любому ИИ-агенту (Cursor / Claude Code / OpenCode):**
     - Точка входа: `mathics3-mcp` (или `python -m mathics.mcp_server`).
     - Экспортирует 6 MCP-инструментов: `wolfram_eval`, `wolfram_integrate`, `wolfram_pade`, `wolfram_residue`, `wolfram_contour_integrate`, `wolfram_stieltjes_resolvent`.
     - Быстрая проверка из терминала:
