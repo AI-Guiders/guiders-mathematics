@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guiders-mathematics"
+version = "0.1.0"
+description = "Projective Computer Algebra System over Q(i, sqrt(d-1)) and Riemann Sphere P^1(C) with exact Hermite-Lagrange-Rothstein-Trager quadrature and pure-rational Pade evaluation on R and C"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Dmitrii A. Karataev"},
+    {name = "Luch (AI-Guiders)"},
+]
+dependencies = [
+    "sympy>=1.12",
+    "pytest>=7.4",
+]
+
+[project.scripts]
+guiders-math = "guiders_math.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
