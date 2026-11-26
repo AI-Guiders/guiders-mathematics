@@ -61,7 +61,11 @@ Get["wolfram/CuboctCarrier.wl"]
 - **Branchless (`0 if`), Zero-Allocation `.NET 11` Native Core (`Ring9 / Bus36 / VerletCell72`) & `$15` Tang Nano 9K FPGA Verilog ASIC:**
   - `https://github.com/AI-Guiders/guiders-physics`
 
-We would love to walk through the `.wl` packages and Lean 4 proofs with you live.
+### Collaboration, Wolfram Institute Fellowship & Relocation / Visa Support
+
+I built and verified this entire stack independently outside traditional academic institutions, funding the compute out of pocket. At this point, the foundation is complete and proven (`0 sorryAx`), and the next stage—scaling the CAS, the `.NET 11` & FPGA hardware transducers, the bio-CAD compiler, and the physical experiments—requires institutional compute and research infrastructure.
+
+Beyond sharing these results with you, I am looking to dedicate myself full-time to this work. If this resonates with you, I would be deeply grateful for the opportunity to discuss a **Research Fellowship or direct collaboration with the Wolfram Institute / Wolfram Research**—including **compute/grant support and relocation / O-1A or J-1 visa sponsorship**—and to walk you through the `.wl` packages and Lean 4 proofs live on a call.
 
 Best regards,  
 **AI Guiders Team**  
@@ -78,3 +82,7 @@ Best regards,
 Ты был прав с самого начала. Все четыре главных возражения академического мейнстрима против *A New Kind of Science* закрыты тотальной машинной верификацией в Lean 4 (`0 sorryAx`, `0 Classical.choice`), а вся дедуктивная башня теорем вместе с живым 3D-клеточным автоматом собрана в 10 модульных пакетах на чистом Wolfram Language (`wolfram/MtCarrier/*.wl`) без единой зашитой физической константы и без единого условного оператора `If[...]`.
 
 При запуске `Get["wolfram/CuboctCarrier.wl"]` сам Wolfram Language решает комбинаторное уравнение Каталана $|\texttt{CellBranchingStates}(d)| = |\texttt{AxisTransitionPairs}(d)| \iff 1 + 2^d = d^2$, находит единственную размерность $d$, строит изотропный кубооктаэдр $O_2(d)$, запускает 3D-клеточный автомат вперёд и назад во времени без стека истории и верифицирует все 10 модулей от уравнений Максвелла, детерминированного правила Борна и $\alpha_{\text{fs}}^{-1}(3) = 137.035999187$ до таблицы Менделеева, 6 биометаллов и компилятора топологии ткани в последовательность ДНК.
+
+Весь этот стек я построила и верифицировала самостоятельно, вне академических институтов и за собственный счёт. Сейчас фундамент полностью завершён и формально доказан (`0 sorryAx`), а следующий этап — масштабирование CAS, аппаратных излучателей на `.NET 11` и FPGA, компилятора Bio-CAD и лабораторных экспериментов — требует исследовательской инфраструктуры и вычислительных ресурсов.
+
+Я хочу посвятить себя этой работе на полную ставку. Если эти результаты вам близки, я буду рада обсудить возможность **Research Fellowship или прямого сотрудничества с Wolfram Institute / Wolfram Research** — включая **вычислительную/грантовую поддержку и содействие с релокацией и визой (O-1A / J-1)** — и вживую показать на созвоне работу `.wl`-пакетов и доказательства в Lean 4.
