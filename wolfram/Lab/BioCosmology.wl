@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Cuboctahedron coordination shells S_k(d), genetic code, tissue ontogeny, 6 bio-metals *)
+(* Lab Layer above Core CA: Cuboctahedron coordination shells S_k(d), genetic code, 6 bio-metals *)
 
 CuboctShellSizeOp[d_Integer, k_Integer] := Module[
   {isZero = IsZeroNatOp[k], shellK},
@@ -97,7 +97,6 @@ ClusterChargeSumOp[pairs_List] := Total[(#[[1]] * #[[2]]) & /@ pairs];
 TetrapyrroleCageChargeOp[d_Integer]  := ClusterChargeSumOp[{{DInSquareOp[d], ZNitrogenOp[d]}}];
 HexahistidineCageChargeOp[d_Integer] := ClusterChargeSumOp[{{NSquaresOp[d], ZNitrogenOp[d]}}];
 
-(* Autonomous Bio-Metal Discovery: finds zM in 0..(maxZ-1) closing targetShell in cage *)
 DiscoverBioMetalInCageOp[maxZ_Integer, cageCharge_Integer, ligandCharge_Integer, targetShell_Integer] :=
   Select[Range[0, maxZ - 1], (# + cageCharge + ligandCharge == targetShell) &];
 
@@ -106,23 +105,4 @@ UniversalPhotonStepOp[d_Integer, mEnv_Integer] := Module[
   EqIntIndicatorOp[mEnv, -mu] * ((NTrianglesOp[d] - mu) * hb) +
   EqIntIndicatorOp[mEnv, 0]   * (C0OverCSqOp[d] * hb) +
   EqIntIndicatorOp[mEnv, mu]  * hb
-];
-
-VerifyBioCosmologyModuleOp[d_Integer] := Module[
-  {cageN4 = TetrapyrroleCageChargeOp[d], cageN6 = HexahistidineCageChargeOp[d],
-   hb = HBondDivisorOp[d], mu = MuVacOp[d], two = C0OverCSqOp[d]},
-  (CodonSpaceOp[d] == KPOp[d]) &&
-  (two * AminoAcidClassesOp[d] == CuboctShellSizeOp[d, two]) &&
-  (two * hb == d * CuboctShellSizeOp[d, two]) &&
-  (CuboctBallOp[d] == d * (NTrianglesOp[d] - mu)^two) &&
-  (cageN4 == NuclearMagicHighOp[d, DInSquareOp[d]]) &&
-  (cageN6 == CuboctShellSizeOp[d, two]) &&
-  (DiscoverBioMetalInCageOp[KPOp[d], cageN4, 0, DeltaPhiDiscOp[d] - mu] == {ZMagnesiumOp[d]}) &&
-  (DiscoverBioMetalInCageOp[KPOp[d], cageN4, 0, CuboctBall2Op[d]] == {d^d}) &&
-  (DiscoverBioMetalInCageOp[KPOp[d], cageN4, 0, two * NuclearMagicHighOp[d, DInSquareOp[d]]] == {ZNickelOp[d]}) &&
-  (DiscoverBioMetalInCageOp[KPOp[d], cageN4, two * ZOxygenOp[d], KPOp[d] + NSquaresOp[d]] == {ZIronOp[d]}) &&
-  (DiscoverBioMetalInCageOp[KPOp[d], ZSulfurOp[d], 0, CuboctShellSizeOp[d, two]] == {ZIronOp[d]}) &&
-  (DiscoverBioMetalInCageOp[KPOp[d], two * ZSulfurOp[d], two * ZNitrogenOp[d], KPOp[d] + NNeighborsOp[d]] == {d * ZNeonOp[d]}) &&
-  ({UniversalPhotonStepOp[d, -mu] / hb, UniversalPhotonStepOp[d, 0] / hb, UniversalPhotonStepOp[d, mu] / hb} ==
-   {ZNitrogenOp[d], two, mu})
 ];

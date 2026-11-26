@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Generative Periodic Table (Periods 1..8), 400-junction ATG protection, DNA->tissue compiler *)
+(* Lab Layer above Core CA: Generative Periodic Table (Periods 1..8), Z_4/Z_64/Z_21 adapters *)
 
 ChannelOrbitalCountOp[d_Integer, ell_Integer] :=
   C0OverCSqOp[d] * ell + MuVacOp[d];
@@ -47,7 +47,6 @@ CodonBase3Op[d_Integer, cod_Integer] :=
 StartCodonAtgOp[d_Integer] :=
   CodonTripletIndexOp[d, C0OverCSqOp[d], 0, d];
 
-(* Canonical triplet codon assignment: b_3 % 2 == mu_vac(d), preventing out-of-frame ATG at shifts +1, +2 *)
 AminoAcidToTripletCodonOp[d_Integer, a_Integer] := Module[
   {four = DInSquareOp[d], sixteen = DInSquareOp[d]^C0OverCSqOp[d]},
   four * Mod[a, sixteen] + (MuVacOp[d] + C0OverCSqOp[d] * Quotient[a, sixteen])
@@ -95,9 +94,56 @@ CompilePhenotypeToDnaSequenceOp[d_Integer, chiTarget_Integer] := Module[
    CodonBase1Op[d, codIg],   CodonBase2Op[d, codIg],   CodonBase3Op[d, codIg]}
 ];
 
+DnaBaseAlphabetOp[] := {"T", "C", "A", "G"};
+
+DnaIndicesToStringOp[dnaIndices_List] :=
+  StringJoin[DnaBaseAlphabetOp[][[# + 1]] & /@ dnaIndices];
+
+DnaLetterToIndexOp[d_Integer, ch_String] :=
+  EqIntIndicatorOp[StringPosition["TCAG", ch][[1, 1]], MuVacOp[d]] * 0 +
+  EqIntIndicatorOp[StringPosition["TCAG", ch][[1, 1]], C0OverCSqOp[d]] * MuVacOp[d] +
+  EqIntIndicatorOp[StringPosition["TCAG", ch][[1, 1]], d] * C0OverCSqOp[d] +
+  EqIntIndicatorOp[StringPosition["TCAG", ch][[1, 1]], DInSquareOp[d]] * d;
+
+DnaStringToIndicesOp[d_Integer, dnaStr_String] :=
+  DnaLetterToIndexOp[d, #] & /@ Characters[dnaStr];
+
+DnaStringToIndicesOp[d_Integer, BioSequence["DNA", dnaStr_String]] :=
+  DnaStringToIndicesOp[d, dnaStr];
+
+CompilePhenotypeToDnaStringOp[d_Integer, chiTarget_Integer] :=
+  DnaIndicesToStringOp[CompilePhenotypeToDnaSequenceOp[d, chiTarget]];
+
+CompilePhenotypeToBioSequenceOp[d_Integer, chiTarget_Integer] :=
+  BioSequence["DNA", CompilePhenotypeToDnaStringOp[d, chiTarget]];
+
+TranslateDnaToAminoAcidChainOp[d_Integer, dnaIndices_List] := Module[
+  {nTriplets = Quotient[Length[dnaIndices], d]},
+  Table[
+    TripletCodonToAminoAcidOp[d,
+      CodonTripletIndexOp[d,
+        dnaIndices[[d * (k - 1) + 1]],
+        dnaIndices[[d * (k - 1) + 2]],
+        dnaIndices[[d * (k - 1) + 3]]]],
+    {k, 1, nTriplets}
+  ]
+];
+
+TranslateDnaToAminoAcidChainOp[d_Integer, dnaStr_String] :=
+  TranslateDnaToAminoAcidChainOp[d, DnaStringToIndicesOp[d, dnaStr]];
+
+TranslateDnaToAminoAcidChainOp[d_Integer, bio_BioSequence] :=
+  TranslateDnaToAminoAcidChainOp[d, DnaStringToIndicesOp[d, bio]];
+
 TranslateTwoCodonDnaToProteinOp[d_Integer, dna_List] :=
   {TripletCodonToAminoAcidOp[d, CodonTripletIndexOp[d, dna[[1]], dna[[2]], dna[[3]]]],
    TripletCodonToAminoAcidOp[d, CodonTripletIndexOp[d, dna[[4]], dna[[5]], dna[[6]]]]};
+
+TranslateTwoCodonDnaToProteinOp[d_Integer, dnaStr_String] :=
+  TranslateTwoCodonDnaToProteinOp[d, DnaStringToIndicesOp[d, dnaStr]];
+
+TranslateTwoCodonDnaToProteinOp[d_Integer, bio_BioSequence] :=
+  TranslateTwoCodonDnaToProteinOp[d, DnaStringToIndicesOp[d, bio]];
 
 GrowTissueFromDnaSequenceInEnvOp[d_Integer, dna_List,
   mGenome_Integer, mEnv_Integer, phiEnv_Integer, rRings_Integer] := Module[
@@ -110,20 +156,16 @@ GrowTissueFromDnaSequenceInEnvOp[d_Integer, dna_List,
   ]
 ];
 
-VerifyNuclearShellsModuleOp[d_Integer] := Module[
-  {nCoding = AminoAcidClassesOp[d] - MuVacOp[d], codingRange, two = C0OverCSqOp[d], dphi = DeltaPhiDiscOp[d]},
-  codingRange = Range[0, nCoding - 1];
-  (Period8RemainingElementsOp[d] == NPhiOp[d] + NSquaresOp[d]) &&
-  (NIslandOfStabilityOp[d] == two * ZUraniumOp[d]) &&
-  (ZLeadTerminalOp[d] < ZUraniumOp[d] < ZIslandFlOp[d] < ZOganessonOp[d] <
-   ZIslandUbnOp[d] < ZCoreDiracDivingOp[d] < ZFissionCeilingOp[d] <
-   ZFeynmanPointLimitOp[d] < ZQedFiniteNucleusLowOp[d] < ZQedFiniteNucleusHighOp[d] <
-   NIslandOfStabilityOp[d]) &&
-  AllTrue[codingRange, (TripletCodonToAminoAcidOp[d, AminoAcidToTripletCodonOp[d, #]] == #) &] &&
-  AllTrue[Tuples[{codingRange, codingRange}],
-    IsJunctionFrameProtectedPred[d, AminoAcidToTripletCodonOp[d, #[[1]]], AminoAcidToTripletCodonOp[d, #[[2]]]] &
-  ] &&
-  (TissueEuler2DOp[GrowTissueFromDnaSequenceInEnvOp[d, CompilePhenotypeToDnaSequenceOp[d, two], 0, 0, dphi, d]] == two) &&
-  (TissueEuler2DOp[GrowTissueFromDnaSequenceInEnvOp[d, CompilePhenotypeToDnaSequenceOp[d, 0], 0, 0, dphi, d]] == 0) &&
-  (TissueEuler2DOp[GrowTissueFromDnaSequenceInEnvOp[d, CompilePhenotypeToDnaSequenceOp[d, dphi], 0, 0, dphi, d]] == dphi)
-];
+GrowTissueFromDnaSequenceInEnvOp[d_Integer, dnaStr_String,
+  mGenome_Integer, mEnv_Integer, phiEnv_Integer, rRings_Integer] :=
+  GrowTissueFromDnaSequenceInEnvOp[d, DnaStringToIndicesOp[d, dnaStr], mGenome, mEnv, phiEnv, rRings];
+
+GrowTissueFromDnaSequenceInEnvOp[d_Integer, bio_BioSequence,
+  mGenome_Integer, mEnv_Integer, phiEnv_Integer, rRings_Integer] :=
+  GrowTissueFromDnaSequenceInEnvOp[d, DnaStringToIndicesOp[d, bio], mGenome, mEnv, phiEnv, rRings];
+
+EncodeDnaToCarrier3DOp[d_Integer, dnaStr_String, n_Integer] :=
+  EncodeStreamToCarrier3DOp[d, DnaStringToIndicesOp[d, dnaStr], n];
+
+EncodeDnaToCarrier3DOp[d_Integer, bio_BioSequence, n_Integer] :=
+  EncodeStreamToCarrier3DOp[d, DnaStringToIndicesOp[d, bio], n];

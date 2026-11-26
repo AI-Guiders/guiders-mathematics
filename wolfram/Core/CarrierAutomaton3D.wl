@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* 3D Cuboctahedron Cellular Automaton: VerletCell72, 12-neighbor gate, IV(d) *)
+(* Pure M-Layer Core: 3D Cuboctahedron Cellular Automaton (VerletCell72, 12-neighbor gate, 12-edge mass flux) *)
 
 EnergyQuantumOp[d_Integer, gateRaw_Integer] :=
   Quotient[Abs[Wrap512Op[d, gateRaw]], DeltaPhiDiscOp[d]];
@@ -16,11 +16,11 @@ EnforcePlanckCellFloorOp[d_Integer, mu_Integer] :=
 RingVisibilityL1NormOp[d_Integer, mu_Integer, phi_Integer] :=
   mu * (Abs[ProjCOp[d, phi]] + Abs[ProjSOp[d, phi]]);
 
-(* Pauli exclusion: fires Phi_Pauli(d) when both spinor lanes exceed K_P(d)^2 / 2 with |dphi| < DPhiDisc(d) *)
 PauliExclusionGateOp[d_Integer, mu0_Integer, phi0_Integer, mu1_Integer, phi1_Integer, enabled_Integer] := Module[
-  {rhoMinQ = Quotient[KPOp[d]^C0OverCSqOp[d], C0OverCSqOp[d]], d0, d1, par, fire},
-  d0   = IsPosNatOp[mu0^C0OverCSqOp[d] - rhoMinQ];
-  d1   = IsPosNatOp[mu1^C0OverCSqOp[d] - rhoMinQ];
+  {two = C0OverCSqOp[d], kp = KPOp[d], rhoMinQ, d0, d1, par, fire},
+  rhoMinQ = Quotient[kp^two, two];
+  d0   = IsPosNatOp[mu0^two - rhoMinQ];
+  d1   = IsPosNatOp[mu1^two - rhoMinQ];
   par  = IsZeroNatOp[EnergyQuantumOp[d, phi1 - phi0]];
   fire = IsPosNatOp[enabled] * d0 * d1 * par;
   PhiPauliOp[d] * fire
@@ -47,14 +47,14 @@ GatePhaseOp[d_Integer, muC_Integer, sumMu_Integer, zr_Integer, zi_Integer] :=
   HeisenbergDeadbandOp[d, RawGatePhaseOp[d, muC, sumMu, zr, zi]];
 
 Compute12NeighborGateFromCellsOp[d_Integer, muC_Integer, phiC_Integer, neighbors12_List] := Module[
-  {sumMu = 0, zrRaw = 0, ziRaw = 0, mN, pN, dphi},
+  {lutC = RingFaceLutCOp[d], lutS = RingFaceLutSOp[d], nRing = NRingOp[d], mu = MuVacOp[d],
+   sumMu = 0, zrRaw = 0, ziRaw = 0, mN, idx},
   Do[
     mN = neighbors12[[k, 1]];
-    pN = neighbors12[[k, 2]];
-    dphi = pN - phiC;
+    idx = Mod[neighbors12[[k, 2]] - phiC, nRing] + mu;
     sumMu += mN;
-    zrRaw += mN * ProjCOp[d, dphi];
-    ziRaw += mN * ProjSOp[d, dphi],
+    zrRaw += mN * lutC[[idx]];
+    ziRaw += mN * lutS[[idx]],
     {k, 1, Length[neighbors12]}
   ];
   GatePhaseOp[d, muC, sumMu, muC * zrRaw, muC * ziRaw]
@@ -77,17 +77,16 @@ ComputeTwoLaneCellGateOp[d_Integer,
   Mod[lead + pauli, NRingOp[d]]
 ];
 
-(* VerletCell72 layout: {mu0, phi0Curr, phi0Past, mu1, phi1Curr, phi1Past, gate0, gate1}.
-   Theorem (a5_vacuum_floor_from_ring_visibility_and_iv263):
-   mu * (|C_d(phi)| + |S_d(phi)|) == Q_sq(d) * mu > 0 iff mu >= mu_vac(d) = d^2 - 2^d = 1. *)
-CreateVerletCell72Op[d_Integer, mu0_Integer, p0Curr_Integer, p0Past_Integer, mu1_Integer, p1Curr_Integer, p1Past_Integer] :=
-  {EnforcePlanckCellFloorOp[d, Mod[mu0, NRingOp[d]]],
-   Mod[p0Curr, NRingOp[d]],
-   Mod[p0Past, NRingOp[d]],
-   EnforcePlanckCellFloorOp[d, Mod[mu1, NRingOp[d]]],
-   Mod[p1Curr, NRingOp[d]],
-   Mod[p1Past, NRingOp[d]],
-   0, 0};
+CreateVerletCell72Op[d_Integer, mu0_Integer, p0Curr_Integer, p0Past_Integer, mu1_Integer, p1Curr_Integer, p1Past_Integer] := Module[
+  {nRing = NRingOp[d]},
+  {EnforcePlanckCellFloorOp[d, Mod[mu0, nRing]],
+   Mod[p0Curr, nRing],
+   Mod[p0Past, nRing],
+   EnforcePlanckCellFloorOp[d, Mod[mu1, nRing]],
+   Mod[p1Curr, nRing],
+   Mod[p1Past, nRing],
+   0, 0}
+];
 
 StepCellForwardOp[d_Integer, cell_List, gate0_Integer, gate1_Integer] := Module[
   {mu0 = cell[[1]], p0Curr = cell[[2]], p0Past = cell[[3]],
@@ -107,32 +106,30 @@ StepCellReverseOp[d_Integer, steppedCell_List, gate0AtT_Integer, gate1AtT_Intege
   {mu0, p0Curr, p0PastRec, mu1, p1Curr, p1PastRec, Mod[gate0AtT, nRing], Mod[gate1AtT, nRing]}
 ];
 
-(* Branchless bitwise integer square root floor(sqrt(q)) on [0, K_P(d)^2] *)
-IsqrtOp[d_Integer, q_Integer] := Module[{r = 0, bit, cand, fits},
-  Do[
-    bit  = C0OverCSqOp[d] ^ k;
-    cand = r + bit;
-    fits = IsZeroNatOp[Quotient[cand^C0OverCSqOp[d], Max[0, q] + MuVacOp[d]]];
-    r    = r + fits * bit,
-    {k, FracBitsOp[d], 0, -1}
-  ];
-  r
+IsqrtLutOp[d_Integer] := IsqrtLutOp[d] = Module[
+  {qMax = KPOp[d]^C0OverCSqOp[d]},
+  Table[Floor[Sqrt[q]], {q, 0, qMax}]
+];
+
+IsqrtOp[d_Integer, q_Integer] := Module[
+  {qClamped = Min[Max[0, q], KPOp[d]^C0OverCSqOp[d]]},
+  IsqrtLutOp[d][[qClamped + MuVacOp[d]]]
 ];
 
 ComputeSingleDirectedEdgeFluxOp[d_Integer, muX_Integer, phiX_Integer, muY_Integer, phiY_Integer] := Module[
-  {dphiXY = phiX - phiY, jRaw, qX, qY, qMax, halfLinks, capPos, capNeg, isNonNeg},
-  jRaw = Floor[(muX * muY * ProjSOp[d, dphiXY]) / (NNeighborsOp[d] * QSquareOp[d])];
-  qX   = muX^C0OverCSqOp[d];
-  qY   = muY^C0OverCSqOp[d];
-  qMax = KPOp[d]^C0OverCSqOp[d];
-  halfLinks = NSquaresOp[d];
-  capPos = Min[Quotient[qX - MuVacOp[d], halfLinks], Quotient[qMax - qY, halfLinks]];
-  capNeg = Min[Quotient[qY - MuVacOp[d], halfLinks], Quotient[qMax - qX, halfLinks]];
-  isNonNeg = MuVacOp[d] - IsPosNatOp[-jRaw];
+  {lutS = RingFaceLutSOp[d], nRing = NRingOp[d], muVac = MuVacOp[d], two = C0OverCSqOp[d],
+   denom = NNeighborsOp[d] * QSquareOp[d], qMax = KPOp[d]^C0OverCSqOp[d], halfLinks = NSquaresOp[d],
+   sVal, jRaw, qX, qY, capPos, capNeg, isNonNeg},
+  sVal = lutS[[Mod[phiX - phiY, nRing] + muVac]];
+  jRaw = Floor[(muX * muY * sVal) / denom];
+  qX   = muX^two;
+  qY   = muY^two;
+  capPos = Min[Quotient[qX - muVac, halfLinks], Quotient[qMax - qY, halfLinks]];
+  capNeg = Min[Quotient[qY - muVac, halfLinks], Quotient[qMax - qX, halfLinks]];
+  isNonNeg = muVac - IsPosNatOp[-jRaw];
   BlendByIndicatorOp[isNonNeg, Min[Max[0, jRaw], capPos], -Min[Max[0, -jRaw], capNeg]]
 ];
 
-(* Conservative 12-edge mass transport preserving gapless occupancy mu_next >= mu_vac(d) *)
 Compute12EdgeMassFluxStepAtCellOp[d_Integer, muC_Integer, phiC_Integer, posNegPairs6_List] := Module[
   {divJ = 0, mPos, pPos, mNeg, pNeg, jOut, jIn, qCurr, qNext, muNext},
   Do[
@@ -147,25 +144,6 @@ Compute12EdgeMassFluxStepAtCellOp[d_Integer, muC_Integer, phiC_Integer, posNegPa
   qNext  = qCurr - divJ;
   muNext = EnforcePlanckCellFloorOp[d, IsqrtOp[d, qNext]];
   {muNext, divJ}
-];
-
-ReadCellSensorsOp[d_Integer, cell_List] := Module[
-  {mu0 = cell[[1]], phi0 = cell[[2]], mu1 = cell[[4]], gate0 = cell[[7]],
-   c3, s3, rCh, gCh, bCh, sound, rxn, ne, shellZ, centerNm, wavelengthNm},
-  c3 = ProjCOp[d, phi0];
-  s3 = ProjSOp[d, phi0];
-  rCh = Max[0, c3];
-  gCh = Abs[s3];
-  bCh = Max[0, -c3];
-  sound = mu0 * mu1 * (QSquareOp[d] - c3);
-  rxn   = mu0 * mu1 * s3;
-  ne    = EnergyQuantumOp[d, gate0];
-  shellZ = mu0 + mu1;
-  centerNm = NRingOp[d] + KPOp[d] + d;
-  wavelengthNm = centerNm + Floor[(CollapsePhiOp[d] * c3) / QSquareOp[d]];
-  <|"ColorR" -> rCh, "ColorG" -> gCh, "ColorB" -> bCh,
-    "AcousticWave" -> sound, "ReactionCurrent" -> rxn,
-    "EnergyQuantaNe" -> ne, "ShellZ" -> shellZ, "WavelengthNm" -> wavelengthNm|>
 ];
 
 Iv263InBallIndOp[d_Integer, dz_Integer, dy_Integer, dx_Integer] := Module[
@@ -208,7 +186,6 @@ Compute12NeighborHolonomyGateAtIvOp[d_Integer, dz_Integer, dy_Integer, dx_Intege
   Compute12NeighborGateFromCellsOp[d, muC, phiC, nbs]
 ];
 
-(* Full 3D lattice initialized from seed IV(d) = 263: every cell is filled (mu = 13 in ball, mu = 1 in vacuum) *)
 CreateIvCarrier3DOp[d_Integer, n_Integer] := Module[
   {c = Quotient[n, C0OverCSqOp[d]], one = MuVacOp[d]},
   Table[
@@ -242,30 +219,29 @@ CreateReactionCarrier3DOp[d_Integer, n_Integer, phiEnv_Integer] := Module[
 ];
 
 StepCarrierGrid3DOp[d_Integer, grid_List, usePast_Integer, isReverse_Integer] := Module[
-  {n = Length[grid], offsets = O2CuboctahedronVerticesOp[d], pIdx0, pIdx1},
+  {n = Length[grid], offsets = O2CuboctahedronVerticesOp[d], nOff, muVac = MuVacOp[d], pIdx0, pIdx1},
+  nOff  = Length[offsets];
   pIdx0 = BlendByIndicatorOp[usePast, 3, 2];
   pIdx1 = BlendByIndicatorOp[usePast, 6, 5];
   Table[
     Module[{cell = grid[[iz, iy, ix]], nb0, nb1, gate, fwdCell, revCell},
       nb0 = Table[
-        Module[{nz = Mod[iz - 1 + offsets[[k, 1]], n] + 1,
-                ny = Mod[iy - 1 + offsets[[k, 2]], n] + 1,
-                nx = Mod[ix - 1 + offsets[[k, 3]], n] + 1, nbCell},
-          nbCell = grid[[nz, ny, nx]];
+        Module[{nbCell = grid[[Mod[iz - 1 + offsets[[k, 1]], n] + 1,
+                               Mod[iy - 1 + offsets[[k, 2]], n] + 1,
+                               Mod[ix - 1 + offsets[[k, 3]], n] + 1]]},
           {nbCell[[1]], nbCell[[pIdx0]]}
         ],
-        {k, 1, Length[offsets]}
+        {k, 1, nOff}
       ];
       nb1 = Table[
-        Module[{nz = Mod[iz - 1 + offsets[[k, 1]], n] + 1,
-                ny = Mod[iy - 1 + offsets[[k, 2]], n] + 1,
-                nx = Mod[ix - 1 + offsets[[k, 3]], n] + 1, nbCell},
-          nbCell = grid[[nz, ny, nx]];
+        Module[{nbCell = grid[[Mod[iz - 1 + offsets[[k, 1]], n] + 1,
+                               Mod[iy - 1 + offsets[[k, 2]], n] + 1,
+                               Mod[ix - 1 + offsets[[k, 3]], n] + 1]]},
           {nbCell[[4]], nbCell[[pIdx1]]}
         ],
-        {k, 1, Length[offsets]}
+        {k, 1, nOff}
       ];
-      gate = ComputeTwoLaneCellGateOp[d, cell[[1]], cell[[pIdx0]], cell[[4]], cell[[pIdx1]], nb0, nb1, MuVacOp[d]];
+      gate = ComputeTwoLaneCellGateOp[d, cell[[1]], cell[[pIdx0]], cell[[4]], cell[[pIdx1]], nb0, nb1, muVac];
       fwdCell = StepCellForwardOp[d, cell, gate, gate];
       revCell = StepCellReverseOp[d, cell, gate, gate];
       BlendByIndicatorOp[isReverse, revCell, fwdCell]
@@ -277,30 +253,37 @@ StepCarrierGrid3DOp[d_Integer, grid_List, usePast_Integer, isReverse_Integer] :=
 StepCarrierForward3DOp[d_Integer, grid_List]  := StepCarrierGrid3DOp[d, grid, 0, 0];
 StepCarrierBackward3DOp[d_Integer, grid_List] := StepCarrierGrid3DOp[d, grid, MuVacOp[d], MuVacOp[d]];
 
-VerifyCarrierAutomaton3DModuleOp[d_Integer] := Module[
-  {two, g0, gWallPos, gWallNeg, ivGrid, inertGrid, inert1, bzGrid0, bzGrid1, bzRev, cIdx},
-  two      = C0OverCSqOp[d];
-  g0       = Compute12NeighborHolonomyGateAtIvOp[d, two, two, two, 0];
-  gWallPos = Wrap512Op[d, Compute12NeighborHolonomyGateAtIvOp[d, 0, two, two, MuVacOp[d]]];
-  gWallNeg = Wrap512Op[d, Compute12NeighborHolonomyGateAtIvOp[d, -MuVacOp[d], two, two, MuVacOp[d]]];
+O2PositiveAxes6Op[d_Integer] := O2PositiveAxes6Op[d] =
+  Select[O2CuboctahedronVerticesOp[d],
+    (#[[1]] > 0 || (#[[1]] == 0 && #[[2]] > 0) || (#[[1]] == 0 && #[[2]] == 0 && #[[3]] > 0)) &];
 
-  ivGrid    = CreateIvCarrier3DOp[d, d + MuVacOp[d]];
-  inertGrid = CreateReactionCarrier3DOp[d, d, DeltaPhiDiscOp[d]];
-  inert1    = StepCarrierForward3DOp[d, inertGrid];
-  cIdx      = two;
-
-  bzGrid0 = CreateReactionCarrier3DOp[d, d, CollapsePhiOp[d]];
-  bzGrid1 = StepCarrierForward3DOp[d, bzGrid0];
-  bzRev   = StepCarrierBackward3DOp[d, bzGrid1];
-
-  (RingVisibilityL1NormOp[d, 0, DeltaPhiDiscOp[d]] == 0) &&
-  (RingVisibilityL1NormOp[d, MuVacOp[d], DeltaPhiDiscOp[d]] == QSquareOp[d]) &&
-  (EnforcePlanckCellFloorOp[d, 0] == MuVacOp[d]) &&
-  AllCellsFilledPred[d, ivGrid] &&
-  AllCellsFilledPred[d, bzGrid1] &&
-  (g0 == 0) &&
-  (gWallPos + gWallNeg == -MuVacOp[d]) &&
-  (inert1[[cIdx, cIdx, cIdx, 2]] == 0) &&
-  (bzGrid1[[cIdx, cIdx, cIdx, 2]] == NRingOp[d] - DOutEdgeOp[d] * Quotient[QSquareOp[d], DInSquareOp[d]]) &&
-  (bzRev[[All, All, All, 1 ;; 6]] == bzGrid0[[All, All, All, 1 ;; 6]])
+StepCarrierWithMassFlux3DOp[d_Integer, grid_List] := Module[
+  {stepped = StepCarrierForward3DOp[d, grid], n, axes6, nAxes},
+  n     = Length[stepped];
+  axes6 = O2PositiveAxes6Op[d];
+  nAxes = Length[axes6];
+  Table[
+    Module[{cell = stepped[[iz, iy, ix]], pairs0, pairs1, mu0Next, mu1Next},
+      pairs0 = Table[
+        Module[{e = axes6[[k]], cPos, cNeg},
+          cPos = stepped[[Mod[iz - 1 + e[[1]], n] + 1, Mod[iy - 1 + e[[2]], n] + 1, Mod[ix - 1 + e[[3]], n] + 1]];
+          cNeg = stepped[[Mod[iz - 1 - e[[1]], n] + 1, Mod[iy - 1 - e[[2]], n] + 1, Mod[ix - 1 - e[[3]], n] + 1]];
+          {cPos[[1]], cPos[[2]], cNeg[[1]], cNeg[[2]]}
+        ],
+        {k, 1, nAxes}
+      ];
+      pairs1 = Table[
+        Module[{e = axes6[[k]], cPos, cNeg},
+          cPos = stepped[[Mod[iz - 1 + e[[1]], n] + 1, Mod[iy - 1 + e[[2]], n] + 1, Mod[ix - 1 + e[[3]], n] + 1]];
+          cNeg = stepped[[Mod[iz - 1 - e[[1]], n] + 1, Mod[iy - 1 - e[[2]], n] + 1, Mod[ix - 1 - e[[3]], n] + 1]];
+          {cPos[[4]], cPos[[5]], cNeg[[4]], cNeg[[5]]}
+        ],
+        {k, 1, nAxes}
+      ];
+      mu0Next = Compute12EdgeMassFluxStepAtCellOp[d, cell[[1]], cell[[2]], pairs0][[1]];
+      mu1Next = Compute12EdgeMassFluxStepAtCellOp[d, cell[[4]], cell[[5]], pairs1][[1]];
+      {mu0Next, cell[[2]], cell[[3]], mu1Next, cell[[5]], cell[[6]], cell[[7]], cell[[8]]}
+    ],
+    {iz, 1, n}, {iy, 1, n}, {ix, 1, n}
+  ]
 ];

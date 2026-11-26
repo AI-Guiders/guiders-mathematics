@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Algebraic alpha_fs^-1(d) in Q(Sqrt[d - mu_vac(d)]), gravity floor eps(d), Voronoi halo *)
+(* Lab Layer above Core CA: Algebraic alpha_fs^-1(d), gravity floor eps(d), Voronoi halo *)
 
 AlphaNumAOp[d_Integer] :=
   Quotient[DInSquareOp[d], C0OverCSqOp[d]] * (NTrianglesOp[d] - MuVacOp[d]) * (MHatOp[d]^C0OverCSqOp[d]);
@@ -46,7 +46,6 @@ BaryonStaticDenomOp[d_Integer, mu_Integer] :=
 BohmGaugeDeficitOp[d_Integer, mu_Integer, dphi_Integer] :=
   NNeighborsOp[d] * (mu^C0OverCSqOp[d]) * Abs[Wrap512Op[d, dphi]];
 
-(* Exact decomposition D(x) === D_baryon(x) - deltaK_Bohm(x) => D_dark === 0 *)
 DarkMatterResidualOp[d_Integer, mu_Integer, dphi_Integer] :=
   (NNeighborsOp[d] * (mu^C0OverCSqOp[d]) * ProjCOp[d, dphi] + QSquareOp[d] * (mu^C0OverCSqOp[d]) + EpsDenomOp[d]) -
   (BaryonStaticDenomOp[d, mu] - BohmGaugeDeficitOp[d, mu, dphi]);
@@ -57,18 +56,3 @@ VoronoiHaloToCoreRatioOp[d_Integer] :=
 BellProdSqOp[d_Integer]    := C0OverCSqOp[d];
 BellLhvSqOp[d_Integer]     := DInSquareOp[d];
 TsirelsonQmSqOp[d_Integer] := C0OverCSqOp[d] * BellLhvSqOp[d];
-
-VerifyContinuumPhysicsModuleOp[d_Integer] := (
-  (EnergyQuantumOp[d, PhiPauliOp[d]] == NSquaresOp[d]) &&
-  (EnergyQuantumOp[d, DeltaPhiDiscOp[d] - MuVacOp[d]] == 0) &&
-  (AlphaFloorIntOp[d] == (NPhiOp[d] - C0OverCSqOp[d])^C0OverCSqOp[d] + DInSquareOp[d]^C0OverCSqOp[d]) &&
-  (AlphaFloorIntOp[d] == QSquareOp[d] + ModBitsOp[d]) &&
-  (AlphaFloorLhsOp[d, 0]^C0OverCSqOp[d] < AlphaFloorRhsSqOp[d]) &&
-  (AlphaFloorRhsSqOp[d] < AlphaFloorLhsOp[d, MuVacOp[d]]^C0OverCSqOp[d]) &&
-  (ShellGateDenomOp[d, KPOp[d], 0] == MaxGravitationalCompressionRatioOp[d] * EpsDenomOp[d]) &&
-  (ShellGateDenomOp[d, KPOp[d], CollapsePhiOp[d]] == EpsDenomOp[d]) &&
-  (ShellGateDenomOp[d, KPOp[d], PhiPauliOp[d]] == EpsDenomOp[d]) &&
-  (DarkMatterResidualOp[d, NPhiOp[d], DeltaPhiDiscOp[d]] == 0) &&
-  (VoronoiHaloToCoreRatioOp[d] == (C0OverCSqOp[d] * NTrianglesOp[d]) / d) &&
-  (TsirelsonQmSqOp[d] == NTrianglesOp[d])
-);

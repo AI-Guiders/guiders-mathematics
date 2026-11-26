@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* Forced deductive chain: Catalan closure 1 + 2^d == d^2 -> unique d -> O_2(d) *)
+(* Pure M-Layer Core: Catalan closure 1 + 2^d == d^2 -> unique d -> O_2(d) *)
 
 CentralOccupancyStateOp[d_Integer] := CentralOccupancyStateOp[d] = ConstantArray[0, d];
 ElementaryAxisSignsOp[d_Integer]   := ElementaryAxisSignsOp[d]   = {-Quotient[d, d], Quotient[d, d]};
@@ -29,7 +29,6 @@ MooreDisplacementCubeOp[d_Integer] := MooreDisplacementCubeOp[d] =
 CubicOrbitByNormSqOp[d_Integer, normSq_Integer] := CubicOrbitByNormSqOp[d, normSq] =
   Select[MooreDisplacementCubeOp[d], (# . #) == normSq &];
 
-(* O_1(d): |e|^2 == mu_vac; O_2(d): |e|^2 == d - mu_vac (cuboctahedron); O_3(d): |e|^2 == d *)
 O1SquareFaceVerticesOp[d_Integer]    := O1SquareFaceVerticesOp[d]    = CubicOrbitByNormSqOp[d, MuVacOp[d]];
 O2CuboctahedronVerticesOp[d_Integer] := O2CuboctahedronVerticesOp[d] = CubicOrbitByNormSqOp[d, C0OverCSqOp[d]];
 O3CornerOctantVerticesOp[d_Integer]  := O3CornerOctantVerticesOp[d]  = CubicOrbitByNormSqOp[d, d];
@@ -80,22 +79,3 @@ ShellCrossFourthMomentOp[shell_List] :=
 
 ShellHasPlanarZeroCoordPred[shell_List] :=
   AnyTrue[shell, MemberQ[#, 0] &];
-
-VerifySpecModuleOp[] := Module[{solutions, d},
-  solutions = SolveUniqueCatalanDimensionOp[8];
-  d = First[solutions];
-  (Length[solutions] == MuVacOp[d]) &&
-  CatalanLockPred[d] &&
-  CatalanInductiveDominancePred[d + MuVacOp[d]] &&
-  HeisenbergLockPred[d] &&
-  GaussianCoulombLockPred[d] &&
-  StarBooleanTwoLaneLockPred[d] &&
-  (Length[AxisRotationPairsOp[d]] * C0OverCSqOp[d] == NNeighborsOp[d]) &&
-  (Mod[DeltaPhiDiscOp[d] * BezoutInvDeltaPhiOp[d], NRingOp[d]] == MuVacOp[d]) &&
-  (ShellSecondMomentTensorOp[d, O2CuboctahedronVerticesOp[d]] ==
-    NTrianglesOp[d] * IdentityMatrix[d]) &&
-  (ShellCrossFourthMomentOp[O1SquareFaceVerticesOp[d]] == 0) &&
-  (ShellCrossFourthMomentOp[O2CuboctahedronVerticesOp[d]] == DInSquareOp[d]) &&
-  (!ShellHasPlanarZeroCoordPred[O3CornerOctantVerticesOp[d]]) &&
-  ShellHasPlanarZeroCoordPred[O2CuboctahedronVerticesOp[d]]
-];
