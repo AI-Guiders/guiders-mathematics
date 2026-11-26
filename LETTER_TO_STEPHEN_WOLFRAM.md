@@ -61,11 +61,26 @@ Get["wolfram/CuboctCarrier.wl"]
 - **Branchless (`0 if`), Zero-Allocation `.NET 11` Native Core (`Ring9 / Bus36 / VerletCell72`) & `$15` Tang Nano 9K FPGA Verilog ASIC:**
   - `https://github.com/AI-Guiders/guiders-physics`
 
-### Collaboration, Wolfram Institute Fellowship & Relocation / Visa Support
+### Planned Fields of Interest (FoI) & Next-Stage Research Roadmap
 
-I built and verified this entire stack independently outside traditional academic institutions, funding the compute out of pocket. At this point, the foundation is complete and proven (`0 sorryAx`), and the next stage—scaling the CAS, the `.NET 11` & FPGA hardware transducers, the bio-CAD compiler, and the physical experiments—requires institutional compute and research infrastructure.
+With the theoretical foundation formally closed (`0 sorryAx`), the immediate roadmap we want to execute next includes:
 
-Beyond sharing these results with you, I am looking to dedicate myself full-time to this work. If this resonates with you, I would be deeply grateful for the opportunity to discuss a **Research Fellowship or direct collaboration with the Wolfram Institute / Wolfram Research**—including **compute/grant support and relocation / O-1A or J-1 visa sponsorship**—and to walk you through the `.wl` packages and Lean 4 proofs live on a call.
+1. **Universal Wolfram Language $\mathcal{T}$-Layer Adapter & Pole-Free Projective CAS over $\mathbb{P}^1(\mathbb{Q}(i, \sqrt{2}))$:**
+   Scaling the homogeneous projective calculus engine (improper, contour, Fresnel–Airy, and infinite-dimensional Hilbert-space resolvent/time-evolution operators, fundamental constants, and Ostrowski–Hermite multiple-root separation for parametric aircraft CAD/CAE) and the 10 `MtCarrier/*.wl` modules into a unified domain adapter across physics, chemistry, biology, and engineering.
+2. **End-to-End Bio-CAD, $O(L)$ Tetrahedral Protein Folding & `.NET 11` Genomic Compiler / Printer:**
+   Scaling the proved inverse morphogenetic compiler (`CompilePhenotypeToDnaSequenceOp` $\to$ `GrowTissueFromDnaSequenceInEnvOp`, 400-junction out-of-frame `ATG` protection, and linear-time co-translational folding on tetrahedral $K_4$ grooves) into a full-scale `.NET 11` genomic printer and Markov-blanket therapeutic design suite.
+3. **Human Connectome & 6-Layer Neocortical Column Modeling on `VerletCell72`:**
+   Modeling the 6-layer cortical column ($\chi_{2D} = \Delta\varphi_{\text{disc}} = 41$, closing the 3-shell chromatin ball $|B_3(3)| = 147$) and full-scale connectome dynamics directly on the history-free reversible 72-bit `VerletCell72` carrier.
+4. **Physical-World Hardware Transducers (`Tang Nano 9K` FPGA / ASIC, 12-Beam $O_2(3)$ Resonators & Phonon-Free Silicon Photovoltaics):**
+   Engineering and laboratory validation of the 12-beam cuboctahedral phase concentrator ($25\times\text{--}587\times$ second-quadrant barrier collapse at $\Delta\varphi = 139$), 4-channel nilpotent Neumann tomography $(2I_4 + N_{\text{nil}})^{-1}$, and the phonon-free silicon singlet-fission cascade ($441\text{ nm} \to 2\times 882\text{ nm} < 1107\text{ nm}$).
+5. **Human–AI Symbiotic Formal Discovery Architecture (CASA & Zero-Boilerplate Engineering):**
+   Advancing the tightly coupled *Human Physicist + Frontier LLMs + Lean 4 Kernel (`0 sorryAx`) + Wolfram Language* methodology that enabled us to formalize and verify this entire multi-disciplinary unification without boilerplate.
+
+### Collaboration, Wolfram Institute Fellowship, Frontier AI Compute Pipe & Visa Support
+
+This entire stack was built and verified independently outside traditional academic institutions through an intensive human–AI formal discovery workflow, funding all frontier LLM API tokens and compute out of pocket. To execute the roadmap above at full speed, the primary bottleneck is no longer theory—it is **unrestricted access to frontier AI/LLM compute and institutional research infrastructure**.
+
+Beyond sharing these results with you, I am looking to dedicate myself full-time to this program. If this resonates with you, I would be deeply grateful for the opportunity to discuss a **Research Fellowship or direct collaboration with the Wolfram Institute / Wolfram Research**—including **an unrestricted frontier LLM / AI compute pipe, research grant support, and relocation / O-1A or J-1 visa sponsorship**—and to walk you through the `.wl` packages and Lean 4 proofs live on a call.
 
 Best regards,  
 **Dmitry Karataev**  
@@ -83,9 +98,16 @@ Founder, AI Guiders (`https://github.com/AI-Guiders`)
 
 При запуске `Get["wolfram/CuboctCarrier.wl"]` сам Wolfram Language решает комбинаторное уравнение Каталана $|\texttt{CellBranchingStates}(d)| = |\texttt{AxisTransitionPairs}(d)| \iff 1 + 2^d = d^2$, находит единственную размерность $d$, строит изотропный кубооктаэдр $O_2(d)$, запускает 3D-клеточный автомат вперёд и назад во времени без стека истории и верифицирует все 10 модулей от уравнений Максвелла, детерминированного правила Борна и $\alpha_{\text{fs}}^{-1}(3) = 137.035999187$ до таблицы Менделеева, 6 биометаллов и компилятора топологии ткани в последовательность ДНК.
 
-Весь этот стек я построил и верифицировал самостоятельно, вне академических институтов и за собственный счёт. Сейчас фундамент полностью завершён и формально доказан (`0 sorryAx`), а следующий этап — масштабирование CAS, аппаратных излучателей на `.NET 11` и FPGA, компилятора Bio-CAD и лабораторных экспериментов — требует исследовательской инфраструктуры и вычислительных ресурсов.
+Весь этот стек был построен и верифицирован самостоятельно, вне академических институтов, в тесном симбиозе «человек-физик + фронтир-ИИ + формальный верификатор Lean 4 (`0 sorryAx`) + Wolfram Language», с оплатой всех токенов и вычислений из собственного кармана. Сейчас теоретический фундамент полностью закрыт, и дальнейшая программа (**Planned Fields of Interest / FoI**) включает:
+1. **Универсальный $\mathcal{T}$-адаптер на Wolfram Language и проективную CAS над $\mathbb{P}^1(\mathbb{Q}(i, \sqrt{2}))$** (включая параметрический авиационный CAD/CAE без `NaN` на полюсах и бесконечномерные операторы эволюции).
+2. **Сквозной Bio-CAD, линейный фолдинг белка на тетраэдре $K_4$ и геномный принтер/компилятор на `.NET 11`** (`CompilePhenotypeToDnaSequenceOp` $\to$ `GrowTissueFromDnaSequenceInEnvOp`).
+3. **Моделирование коннектома человека и 6-слойной кортикальной колонки неокортекса** ($\chi_{2D} = \Delta\varphi_{\text{disc}} = 41$, $|B_3(3)| = 147$) на обратимом 72-битном носителе `VerletCell72`.
+4. **Аппаратные излучатели к физическому миру (`Tang Nano 9K` FPGA / ASIC, 12-лучевые резонаторы $O_2(3)$ и бесфононный кремниевый фотокаскад $441\text{ нм} \to 2\times 882\text{ нм}$)**.
+5. **Развитие архитектуры человеко-машинного формального открытия (CASA и разработка без бойлерплейта)**.
 
-Я хочу посвятить себя этой работе на полную ставку. Если эти результаты вам близки, я буду рад обсудить возможность **Research Fellowship или прямого сотрудничества с Wolfram Institute / Wolfram Research** — включая **вычислительную/грантовую поддержку и содействие с релокацией и визой (O-1A / J-1)** — и вживую показать на созвоне работу `.wl`-пакетов и доказательства в Lean 4.
+Главное узкое место для реализации этой программы на полной скорости — **бесперебойная корпоративная труба к фронтир-моделям ИИ (unrestricted frontier LLM / AI compute pipe) и исследовательская инфраструктура**.
+
+Я хочу посвятить себя этой работе на полную ставку. Если эти результаты вам близки, я буду рад обсудить возможность **Research Fellowship или прямого сотрудничества с Wolfram Institute / Wolfram Research** — включая **выделенную трубу к фронтир-ИИ/LLM, грантовую поддержку и содействие с релокацией и визой (O-1A / J-1)** — и вживую показать на созвоне работу `.wl`-пакетов и доказательства в Lean 4.
 
 С уважением,  
 **Дмитрий Каратаев**  
