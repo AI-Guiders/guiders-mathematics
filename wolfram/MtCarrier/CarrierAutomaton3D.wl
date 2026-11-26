@@ -13,6 +13,9 @@ HeisenbergDeadbandOp[d_Integer, gateRaw_Integer] := Module[
 EnforcePlanckCellFloorOp[d_Integer, mu_Integer] :=
   Max[0, mu] + MuVacOp[d] * IsZeroNatOp[Max[0, mu]];
 
+RingVisibilityL1NormOp[d_Integer, mu_Integer, phi_Integer] :=
+  mu * (Abs[ProjCOp[d, phi]] + Abs[ProjSOp[d, phi]]);
+
 (* Pauli exclusion: fires Phi_Pauli(d) when both spinor lanes exceed K_P(d)^2 / 2 with |dphi| < DPhiDisc(d) *)
 PauliExclusionGateOp[d_Integer, mu0_Integer, phi0_Integer, mu1_Integer, phi1_Integer, enabled_Integer] := Module[
   {rhoMinQ = Quotient[KPOp[d]^C0OverCSqOp[d], C0OverCSqOp[d]], d0, d1, par, fire},
@@ -75,7 +78,8 @@ ComputeTwoLaneCellGateOp[d_Integer,
 ];
 
 (* VerletCell72 layout: {mu0, phi0Curr, phi0Past, mu1, phi1Curr, phi1Past, gate0, gate1}.
-   Axiom A5 (gapless occupancy): every cell in the lattice is filled (mu0 >= mu_vac(d), mu1 >= mu_vac(d)). *)
+   Theorem (a5_vacuum_floor_from_ring_visibility_and_iv263):
+   mu * (|C_d(phi)| + |S_d(phi)|) == Q_sq(d) * mu > 0 iff mu >= mu_vac(d) = d^2 - 2^d = 1. *)
 CreateVerletCell72Op[d_Integer, mu0_Integer, p0Curr_Integer, p0Past_Integer, mu1_Integer, p1Curr_Integer, p1Past_Integer] :=
   {EnforcePlanckCellFloorOp[d, Mod[mu0, NRingOp[d]]],
    Mod[p0Curr, NRingOp[d]],
@@ -289,6 +293,8 @@ VerifyCarrierAutomaton3DModuleOp[d_Integer] := Module[
   bzGrid1 = StepCarrierForward3DOp[d, bzGrid0];
   bzRev   = StepCarrierBackward3DOp[d, bzGrid1];
 
+  (RingVisibilityL1NormOp[d, 0, DeltaPhiDiscOp[d]] == 0) &&
+  (RingVisibilityL1NormOp[d, MuVacOp[d], DeltaPhiDiscOp[d]] == QSquareOp[d]) &&
   (EnforcePlanckCellFloorOp[d, 0] == MuVacOp[d]) &&
   AllCellsFilledPred[d, ivGrid] &&
   AllCellsFilledPred[d, bzGrid1] &&
