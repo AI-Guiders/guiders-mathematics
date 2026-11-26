@@ -24,6 +24,19 @@
      $$
 5. **Cavalieri–Lagrange Algebraic Differential & Padé Approximants (`guiders_math.calculus`):**
    - Limit-free derivative `p_diff` in the dual ring $\mathbb{Q}(i, \sqrt{d-1})(t)[\varepsilon]/(\varepsilon^2)$, exact Toeplitz Padé approximant `p_pade(expr, x, m, n)`, and projective ODE solver `p_dsolve`.
+6. **Pure Wolfram Language Projective Manifold & 3D Cellular Automaton Suite (`wolfram/`):**
+   - **`wolfram/Core/`** (`ProjectiveCalculus.wl`, `Spec.wl`, `FaceAlgebra.wl`, `HolonomyMaxwell.wl`, `CarrierAutomaton3D.wl`): Pure mathematical projective calculus over $\mathbb{Z}_{2^m} \to \mathbb{P}^1(\mathbb{Q})$ for arbitrary rank $m \ge 3$, spatial dimension $d \ge 2$, and closed-form $N$-dimensional quadratic Fresnel sum $\mathcal{I}_N(m) = (1+i)^N \cdot 2^{(m-2)+N\lfloor m/2\rfloor+\lfloor N/2\rfloor(m\bmod 2)}$, plus the branchless 3D cuboctahedral cellular automaton (`0` conditional `If[...]` branches).
+   - **`wolfram/Lab/`** (`MToT.wl`, `ContinuumPhysics.wl`, `BioCosmology.wl`, `NuclearShells.wl`, `ParticleMaterials.wl`, `ReversibleCalculus.wl`, `HardwarePhotovoltaics.wl`, `VerifySuite.wl`): Stream encoders (`DNA -> CA -> Graphics3D/Data`), domain adapters, and on-demand verification suites.
+
+---
+
+## Open Science Invitation, Community Verification & Honest Disclaimer
+
+**Mathematics and science do not belong to isolated individuals — they belong to humanity and to all thinking actors on this planet.**
+
+- **Working Core, Open to Audit:** The projective calculus engine (`guiders_math/`), the Wolfram Language suite (`wolfram/Core/`, `wolfram/Lab/`), and the native `Mathics3` integration are open and reproducible.
+- **Honest Disclaimer:** Even for a human working with frontier AI models, a project of this breadth cannot be audited in isolation. Documentation, comments, domain mappings in `wolfram/Lab/`, or edge-case reductions **may contain typos, inaccuracies, or unoptimized paths that need independent verification, additional solver cross-checks, and community review**.
+- **Join Us Like Wikipedia:** Everything is open under reciprocal free licenses. We invite the **Wolfram Language**, **Mathics3**, **SymPy**, and **Lean 4** communities, as well as mathematicians, computer scientists, and AI actors worldwide, to test, critique, find bugs, open Issues, and submit Pull Requests.
 
 ---
 
