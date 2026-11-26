@@ -5,7 +5,10 @@ mtCarrierBaseDir = DirectoryName[$InputFileName];
 mtCoreDir        = FileNameJoin[{mtCarrierBaseDir, "Core"}];
 mtLabDir         = FileNameJoin[{mtCarrierBaseDir, "Lab"}];
 
-(* Layer 1: Pure M-Layer Cellular Automaton Core (0 domain/SI/biology/sequence knowledge) *)
+(* Layer 0: Pure Mathematical Projective Manifold & CAS Calculus over Z_{2^m} (arbitrary m -> Infinity, d >= 2, nDim >= 1) *)
+Get[FileNameJoin[{mtCoreDir, "ProjectiveCalculus.wl"}]];
+
+(* Layer 1: Pure M-Layer Cellular Automaton Core (Catalan specialization 1 + 2^d == d^2 -> d=3, m=9) *)
 Get[FileNameJoin[{mtCoreDir, "Spec.wl"}]];
 Get[FileNameJoin[{mtCoreDir, "FaceAlgebra.wl"}]];
 Get[FileNameJoin[{mtCoreDir, "HolonomyMaxwell.wl"}]];

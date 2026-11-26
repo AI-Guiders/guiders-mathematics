@@ -1,6 +1,36 @@
 (* ::Package:: *)
 (* On-demand verification suite for Core and Lab packages *)
 
+VerifyProjectiveCalculusModuleOp[] := Module[
+  {ranksOk, limitEmbeddingOk, ndSumOk, isotropyOk, contourOk, verletOk},
+  ranksOk = AllTrue[Range[3, 8], Module[{m = #, nRing = ProjectiveRingSizeOp[#], qSq = ProjectiveQuadrantSizeOp[#]},
+    AllTrue[Range[0, nRing - 1],
+      (ProjectiveGrayButterflyPairOp[m, #] == {ProjectiveCharCOp[m, #], ProjectiveCharSOp[m, #]}) &&
+      (ProjectiveWronskianOp[m, #] == qSq) &&
+      (Total[ProjectiveUnitCircleRationalPointOp[m, #]^2] == 1) &
+    ] &&
+    (Projective1DQuadraticSumDirectOp[m] == ProjectiveNDQuadraticSumClosedOp[m, 1])
+  ] &];
+  limitEmbeddingOk = AllTrue[Range[3, 12],
+    (ProjectiveUnitCircleRationalPointOp[# + 1, 2 * 7] == ProjectiveUnitCircleRationalPointOp[#, 7]) &
+  ];
+  ndSumOk = (Sum[
+    ProjectiveCharCOp[4, x^2 + y^2 + z^2] + I * ProjectiveCharSOp[4, x^2 + y^2 + z^2],
+    {x, 0, 15}, {y, 0, 15}, {z, 0, 15}
+  ] == ProjectiveNDQuadraticSumClosedOp[4, 3]);
+  isotropyOk = AllTrue[Range[2, 5],
+    (Length[ProjectiveIsotropicStencilO2Op[#]] == 2 * # * (# - 1)) &&
+    (ProjectiveIsotropicSecondMomentOp[#] == 4 * (# - 1) * IdentityMatrix[#]) &
+  ];
+  contourOk = AllTrue[{5, 9, 16, 32}, Module[{m = #, q = ProjectiveQuadrantSizeOp[#]},
+    ProjectiveContourWindingIndexOp[m, {0, q + 1, 2 * (q + 1), 3 * (q + 1)}] == 1
+  ] &];
+  verletOk = (ProjectiveSymplecticStepReverseOp[64,
+    ProjectiveSymplecticStepForwardOp[64, 123456789, 987654321, 7777777][[1]],
+    123456789, 7777777] == {123456789, 987654321});
+  ranksOk && limitEmbeddingOk && ndSumOk && isotropyOk && contourOk && verletOk
+];
+
 VerifySpecModuleOp[] := Module[{solutions, d},
   solutions = SolveUniqueCatalanDimensionOp[8];
   d = First[solutions];
