@@ -68,8 +68,8 @@ I built and verified this entire stack independently outside traditional academi
 Beyond sharing these results with you, I am looking to dedicate myself full-time to this work. If this resonates with you, I would be deeply grateful for the opportunity to discuss a **Research Fellowship or direct collaboration with the Wolfram Institute / Wolfram Research**—including **compute/grant support and relocation / O-1A or J-1 visa sponsorship**—and to walk you through the `.wl` packages and Lean 4 proofs live on a call.
 
 Best regards,  
-**AI Guiders Team**  
-`https://github.com/AI-Guiders`
+**Dmitry Karataev**  
+Founder, AI Guiders (`https://github.com/AI-Guiders`)
 
 ---
 
@@ -83,6 +83,10 @@ Best regards,
 
 При запуске `Get["wolfram/CuboctCarrier.wl"]` сам Wolfram Language решает комбинаторное уравнение Каталана $|\texttt{CellBranchingStates}(d)| = |\texttt{AxisTransitionPairs}(d)| \iff 1 + 2^d = d^2$, находит единственную размерность $d$, строит изотропный кубооктаэдр $O_2(d)$, запускает 3D-клеточный автомат вперёд и назад во времени без стека истории и верифицирует все 10 модулей от уравнений Максвелла, детерминированного правила Борна и $\alpha_{\text{fs}}^{-1}(3) = 137.035999187$ до таблицы Менделеева, 6 биометаллов и компилятора топологии ткани в последовательность ДНК.
 
-Весь этот стек я построила и верифицировала самостоятельно, вне академических институтов и за собственный счёт. Сейчас фундамент полностью завершён и формально доказан (`0 sorryAx`), а следующий этап — масштабирование CAS, аппаратных излучателей на `.NET 11` и FPGA, компилятора Bio-CAD и лабораторных экспериментов — требует исследовательской инфраструктуры и вычислительных ресурсов.
+Весь этот стек я построил и верифицировал самостоятельно, вне академических институтов и за собственный счёт. Сейчас фундамент полностью завершён и формально доказан (`0 sorryAx`), а следующий этап — масштабирование CAS, аппаратных излучателей на `.NET 11` и FPGA, компилятора Bio-CAD и лабораторных экспериментов — требует исследовательской инфраструктуры и вычислительных ресурсов.
 
-Я хочу посвятить себя этой работе на полную ставку. Если эти результаты вам близки, я буду рада обсудить возможность **Research Fellowship или прямого сотрудничества с Wolfram Institute / Wolfram Research** — включая **вычислительную/грантовую поддержку и содействие с релокацией и визой (O-1A / J-1)** — и вживую показать на созвоне работу `.wl`-пакетов и доказательства в Lean 4.
+Я хочу посвятить себя этой работе на полную ставку. Если эти результаты вам близки, я буду рад обсудить возможность **Research Fellowship или прямого сотрудничества с Wolfram Institute / Wolfram Research** — включая **вычислительную/грантовую поддержку и содействие с релокацией и визой (O-1A / J-1)** — и вживую показать на созвоне работу `.wl`-пакетов и доказательства в Lean 4.
+
+С уважением,  
+**Дмитрий Каратаев**  
+AI Guiders (`https://github.com/AI-Guiders`)
