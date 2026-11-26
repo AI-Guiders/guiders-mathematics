@@ -252,38 +252,3 @@ StepCarrierGrid3DOp[d_Integer, grid_List, usePast_Integer, isReverse_Integer] :=
 
 StepCarrierForward3DOp[d_Integer, grid_List]  := StepCarrierGrid3DOp[d, grid, 0, 0];
 StepCarrierBackward3DOp[d_Integer, grid_List] := StepCarrierGrid3DOp[d, grid, MuVacOp[d], MuVacOp[d]];
-
-O2PositiveAxes6Op[d_Integer] := O2PositiveAxes6Op[d] =
-  Select[O2CuboctahedronVerticesOp[d],
-    (#[[1]] > 0 || (#[[1]] == 0 && #[[2]] > 0) || (#[[1]] == 0 && #[[2]] == 0 && #[[3]] > 0)) &];
-
-StepCarrierWithMassFlux3DOp[d_Integer, grid_List] := Module[
-  {stepped = StepCarrierForward3DOp[d, grid], n, axes6, nAxes},
-  n     = Length[stepped];
-  axes6 = O2PositiveAxes6Op[d];
-  nAxes = Length[axes6];
-  Table[
-    Module[{cell = stepped[[iz, iy, ix]], pairs0, pairs1, mu0Next, mu1Next},
-      pairs0 = Table[
-        Module[{e = axes6[[k]], cPos, cNeg},
-          cPos = stepped[[Mod[iz - 1 + e[[1]], n] + 1, Mod[iy - 1 + e[[2]], n] + 1, Mod[ix - 1 + e[[3]], n] + 1]];
-          cNeg = stepped[[Mod[iz - 1 - e[[1]], n] + 1, Mod[iy - 1 - e[[2]], n] + 1, Mod[ix - 1 - e[[3]], n] + 1]];
-          {cPos[[1]], cPos[[2]], cNeg[[1]], cNeg[[2]]}
-        ],
-        {k, 1, nAxes}
-      ];
-      pairs1 = Table[
-        Module[{e = axes6[[k]], cPos, cNeg},
-          cPos = stepped[[Mod[iz - 1 + e[[1]], n] + 1, Mod[iy - 1 + e[[2]], n] + 1, Mod[ix - 1 + e[[3]], n] + 1]];
-          cNeg = stepped[[Mod[iz - 1 - e[[1]], n] + 1, Mod[iy - 1 - e[[2]], n] + 1, Mod[ix - 1 - e[[3]], n] + 1]];
-          {cPos[[4]], cPos[[5]], cNeg[[4]], cNeg[[5]]}
-        ],
-        {k, 1, nAxes}
-      ];
-      mu0Next = Compute12EdgeMassFluxStepAtCellOp[d, cell[[1]], cell[[2]], pairs0][[1]];
-      mu1Next = Compute12EdgeMassFluxStepAtCellOp[d, cell[[4]], cell[[5]], pairs1][[1]];
-      {mu0Next, cell[[2]], cell[[3]], mu1Next, cell[[5]], cell[[6]], cell[[7]], cell[[8]]}
-    ],
-    {iz, 1, n}, {iy, 1, n}, {ix, 1, n}
-  ]
-];

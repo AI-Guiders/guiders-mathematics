@@ -41,14 +41,14 @@ EncodeStreamToCarrier3DOp[d_Integer, stream_List, n_Integer] := Module[
   ]
 ];
 
-(* Runs the pure 3D CA (phase Verlet + 12-edge mass flux) for nSteps ticks *)
+(* Runs the pure 3D CA transition function StepCarrierForward3DOp for nSteps ticks *)
 RunCarrier3DLabStepsOp[d_Integer, initGrid_List, nSteps_Integer] :=
-  Nest[StepCarrierWithMassFlux3DOp[d, #] &, initGrid, nSteps];
+  Nest[StepCarrierForward3DOp[d, #] &, initGrid, nSteps];
 
 (* Node record layout: {1:Coord, 2:Mu0, 3:Phi0, 4:Mu1, 5:Phi1, 6:Gate0, 7:EnergyQuanta, 8:Channel6, 9:RGB} *)
 ExtractActiveLatticeGraph3DOp[d_Integer, grid_List] := Module[
   {n = Length[grid], two = C0OverCSqOp[d], nSq = NSquaresOp[d], dphi = DeltaPhiDiscOp[d],
-   qSq = QSquareOp[d], muVac = MuVacOp[d], nphi = NPhiOp[d],
+   qSq = QSquareOp[d], muVac = MuVacOp[d],
    allCells, activeNodes, nV, nbList, edges = {}, edgeWeights = {}, tris = {}, tets = {},
    channelCounts},
   allCells = Flatten[
@@ -65,19 +65,12 @@ ExtractActiveLatticeGraph3DOp[d_Integer, grid_List] := Module[
     ],
     2
   ];
-  activeNodes = Select[allCells, (#[[7]] > 0 || (#[[2]] + #[[4]]) >= two * nphi) &];
+  activeNodes = Select[allCells, (#[[7]] > 0) &];
   nV = Length[activeNodes];
   nbList = Table[
     Select[Range[u + 1, nV],
-      Module[{du = activeNodes[[u, 1]] - activeNodes[[#, 1]], flux, dGate},
-        ((du . du) == two) &&
-        (
-          flux  = Abs[ComputeSingleDirectedEdgeFluxOp[d,
-                    activeNodes[[u, 2]], activeNodes[[u, 3]],
-                    activeNodes[[#, 2]], activeNodes[[#, 3]]]];
-          dGate = EnergyQuantumOp[d, activeNodes[[u, 3]] - activeNodes[[#, 3]]];
-          (flux + dGate) > 0
-        )
+      Module[{du = activeNodes[[u, 1]] - activeNodes[[#, 1]]},
+        ((du . du) == two)
       ] &
     ],
     {u, 1, nV}
@@ -85,12 +78,7 @@ ExtractActiveLatticeGraph3DOp[d_Integer, grid_List] := Module[
   Do[
     Do[
       AppendTo[edges, {u, v}];
-      AppendTo[edgeWeights,
-        Abs[ComputeSingleDirectedEdgeFluxOp[d,
-              activeNodes[[u, 2]], activeNodes[[u, 3]],
-              activeNodes[[v, 2]], activeNodes[[v, 3]]]] +
-        EnergyQuantumOp[d, activeNodes[[u, 3]] - activeNodes[[v, 3]]]
-      ];
+      AppendTo[edgeWeights, activeNodes[[u, 7]] + activeNodes[[v, 7]]];
       Do[
         AppendTo[tris, {u, v, w}];
         Do[
