@@ -1,5 +1,5 @@
 (* ::Package:: *)
-(* T <-> M Layer above Core CA: stream->lattice encoding, sensor readout, 3D graph & Graphics3D extraction *)
+(* T <-> M Layer above Core CA: stream->lattice encoding, sensor readout, branchless 3D graph & Graphics3D *)
 
 ReadCellSensorsOp[d_Integer, cell_List] := Module[
   {mu0 = cell[[1]], phi0 = cell[[2]], mu1 = cell[[4]], gate0 = cell[[7]],
@@ -45,78 +45,108 @@ EncodeStreamToCarrier3DOp[d_Integer, stream_List, n_Integer] := Module[
 RunCarrier3DLabStepsOp[d_Integer, initGrid_List, nSteps_Integer] :=
   Nest[StepCarrierForward3DOp[d, #] &, initGrid, nSteps];
 
-(* Node record layout: {1:Coord, 2:Mu0, 3:Phi0, 4:Mu1, 5:Phi1, 6:Gate0, 7:EnergyQuanta, 8:Channel6, 9:RGB} *)
+(* Pure branchless lattice readout without Select/filter:
+   Every cell exists on the lattice; excitation indicator act(u) = IsPosNatOp[ne(u)] in {0, 1}.
+   Node record layout: {1:Coord, 2:Mu0, 3:Phi0, 4:Mu1, 5:Phi1, 6:Gate0, 7:Ne, 8:Act, 9:Channel6, 10:RGB} *)
 ExtractActiveLatticeGraph3DOp[d_Integer, grid_List] := Module[
   {n = Length[grid], two = C0OverCSqOp[d], nSq = NSquaresOp[d], dphi = DeltaPhiDiscOp[d],
    qSq = QSquareOp[d], muVac = MuVacOp[d],
-   allCells, activeNodes, nV, nbList, edges = {}, edgeWeights = {}, tris = {}, tets = {},
-   channelCounts},
+   allCells, nTotal, fccPairs, nV, nE = 0, totalWeight = 0, nK3 = 0, nK4 = 0,
+   nbUpper, channelCounts},
   allCells = Flatten[
     Table[
-      Module[{cell = grid[[iz, iy, ix]], c3, s3, ne, ch, rgb},
+      Module[{cell = grid[[iz, iy, ix]], c3, s3, ne, act, ch, rgb},
         c3  = ProjCOp[d, cell[[2]]];
         s3  = ProjSOp[d, cell[[2]]];
         ne  = EnergyQuantumOp[d, cell[[7]]];
+        act = IsPosNatOp[ne];
         ch  = Mod[Quotient[cell[[2]], dphi], nSq] + muVac;
         rgb = {Max[0, c3], Abs[s3], Max[0, -c3]} / qSq;
-        {{iz, iy, ix}, cell[[1]], cell[[2]], cell[[4]], cell[[5]], cell[[7]], ne, ch, rgb}
+        {{iz, iy, ix}, cell[[1]], cell[[2]], cell[[4]], cell[[5]], cell[[7]], ne, act, ch, rgb}
       ],
       {iz, 1, n}, {iy, 1, n}, {ix, 1, n}
     ],
     2
   ];
-  activeNodes = Select[allCells, (#[[7]] > 0) &];
-  nV = Length[activeNodes];
-  nbList = Table[
-    Select[Range[u + 1, nV],
-      Module[{du = activeNodes[[u, 1]] - activeNodes[[#, 1]]},
-        ((du . du) == two)
-      ] &
+  nTotal = Length[allCells];
+  nV     = Sum[allCells[[u, 8]], {u, 1, nTotal}];
+  nbUpper = Table[
+    Module[{cu = allCells[[u, 1]], list = {}},
+      Do[
+        Module[{du = cu - allCells[[v, 1]], isEdge},
+          isEdge = EqIntIndicatorOp[du . du, two];
+          list   = Join[list, ConstantArray[v, isEdge]]
+        ],
+        {v, u + 1, nTotal}
+      ];
+      list
     ],
-    {u, 1, nV}
+    {u, 1, nTotal}
+  ];
+  fccPairs = Flatten[
+    Table[
+      Table[{u, v}, {v, nbUpper[[u]]}],
+      {u, 1, nTotal}
+    ],
+    1
   ];
   Do[
-    Do[
-      AppendTo[edges, {u, v}];
-      AppendTo[edgeWeights, activeNodes[[u, 7]] + activeNodes[[v, 7]]];
+    Module[{au = allCells[[u, 8]]},
       Do[
-        AppendTo[tris, {u, v, w}];
-        Do[
-          AppendTo[tets, {u, v, w, q}],
-          {q, Intersection[nbList[[u]], nbList[[v]], nbList[[w]]]}
+        Module[{av = allCells[[v, 8]], eAct},
+          eAct = au * av;
+          nE += eAct;
+          totalWeight += eAct * (allCells[[u, 7]] + allCells[[v, 7]]);
+          Do[
+            Module[{aw = allCells[[w, 8]], tAct},
+              tAct = eAct * aw;
+              nK3 += tAct;
+              Do[
+                nK4 += tAct * allCells[[q, 8]],
+                {q, Intersection[nbUpper[[u]], nbUpper[[v]], nbUpper[[w]]]}
+              ]
+            ],
+            {w, Intersection[nbUpper[[u]], nbUpper[[v]]]}
+          ]
         ],
-        {w, Intersection[nbList[[u]], nbList[[v]]]}
-      ],
-      {v, nbList[[u]]}
+        {v, nbUpper[[u]]}
+      ]
     ],
-    {u, 1, nV}
+    {u, 1, nTotal}
   ];
-  channelCounts = Table[Length[Select[activeNodes, (#[[8]] == c) &]], {c, 1, nSq}];
-  <|"NodeCount" -> nV,
-    "EdgeCount" -> Length[edges],
-    "TriangleK3Count" -> Length[tris],
-    "TetrahedraK4Count" -> Length[tets],
-    "EulerChi2D" -> (nV - Length[edges] + Length[tris]),
-    "MeanDegree" -> (two * Length[edges]) / Max[1, nV],
+  channelCounts = Table[
+    Sum[allCells[[u, 8]] * EqIntIndicatorOp[allCells[[u, 9]], c], {u, 1, nTotal}],
+    {c, 1, nSq}
+  ];
+  <|"LatticeSize" -> nTotal,
+    "NodeCount" -> nV,
+    "EdgeCount" -> nE,
+    "TriangleK3Count" -> nK3,
+    "TetrahedraK4Count" -> nK4,
+    "EulerChi2D" -> (nV - nE + nK3),
+    "EulerChi3D" -> (nV - nE + nK3 - nK4),
+    "MeanDegree" -> (two * nE) / Max[1, nV],
+    "TotalEdgeWeight" -> totalWeight,
     "Channel6Spectrum" -> channelCounts,
-    "Nodes" -> activeNodes,
-    "Edges" -> edges,
-    "EdgeWeights" -> edgeWeights,
-    "TrianglesK3" -> tris,
-    "TetrahedraK4" -> tets|>
+    "Cells" -> allCells,
+    "FccEdges" -> fccPairs|>
 ];
 
-(* Builds a symbolic Wolfram Language Graphics3D scene from the extracted 3D lattice graph *)
+(* Pure branchless Graphics3D scene: every cell u has radius 0.08 * muVac + 0.05 * ne(u),
+   and every FCC link (u, v) is drawn with opacity proportional to act(u) * act(v) *)
 RenderLatticeGraphics3DOp[d_Integer, graphAssoc_Association] := Module[
-  {nodes = graphAssoc["Nodes"], edges = graphAssoc["Edges"], spherePrims, edgePrims},
+  {cells = graphAssoc["Cells"], fccEdges = graphAssoc["FccEdges"], spherePrims, edgePrims},
   spherePrims = Table[
-    {RGBColor @@ nodes[[u, 9]],
-     Sphere[nodes[[u, 1]], 0.28]},
-    {u, 1, Length[nodes]}
+    {RGBColor @@ cells[[u, 10]],
+     Sphere[cells[[u, 1]], 0.06 * cells[[u, 8]] * (MuVacOp[d] + cells[[u, 7]])]},
+    {u, 1, Length[cells]}
   ];
   edgePrims = Table[
-    Line[{nodes[[edges[[e, 1]], 1]], nodes[[edges[[e, 2]], 1]]}],
-    {e, 1, Length[edges]}
+    Module[{u = fccEdges[[e, 1]], v = fccEdges[[e, 2]], eAct},
+      eAct = cells[[u, 8]] * cells[[v, 8]];
+      {Opacity[eAct], Line[{cells[[u, 1]], cells[[v, 1]]}]}
+    ],
+    {e, 1, Length[fccEdges]}
   ];
   Graphics3D[{spherePrims, edgePrims}, Boxed -> True]
 ];
