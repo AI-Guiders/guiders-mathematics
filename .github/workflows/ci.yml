@@ -1,0 +1,33 @@
+name: Guiders Mathematics CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-and-test:
+    name: Projective Calculus Verification & Pytest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run verify_principles.py
+        run: |
+          python verify_principles.py
+
+      - name: Run pytest suite
+        run: |
+          pytest -q
